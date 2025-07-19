@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Brave Backup</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 15px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #333;
+      background-color: white;
+    }
+    button {
+      background-color: #3f51b5;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 8px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #303f9f;
+    }
+    button.secondary {
+      background-color: #757de8;
+    }
+    button.secondary:hover {
+      background-color: #5c6bc0;
+    }
+    button:disabled {
+      background-color: #b0bec5;
+      cursor: not-allowed;
+    }
+    #status {
+      margin: 10px 0;
+      font-size: 13px;
+      color: #666;
+      min-height: 40px;
+      line-height: 1.4;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #1a237e;
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .options {
+      margin: 15px 0;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+    }
+    label {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      cursor: pointer;
+    }
+    input[type="checkbox"] {
+      margin-right: 8px;
+    }
+    .progress-container {
+      margin: 12px 0;
+    }
+    .progress-label {
+      font-size: 12px;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-bar {
+      height: 6px;
+      background-color: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #3f51b5;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #757575;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      color: #3f51b5;
+      border-bottom-color: #3f51b5;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .file-input-wrapper {
+      margin: 12px 0;
+    }
+    .file-input-label {
+      display: block;
+      padding: 10px;
+      background-color: #e0e0e0;
+      text-align: center;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .file-input-label:hover {
+      background-color: #d0d0d0;
+    }
+    #importFile {
+      display: none;
+    }
+    .settings-panel {
+      margin: 15px 0;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+    }
+    .settings-toggle {
+      color: #3f51b5;
+      cursor: pointer;
+      text-align: right;
+      font-size: 13px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .settings-toggle svg {
+      margin-right: 6px;
+    }
+    #backupPath {
+      width: 100%;
+      padding: 8px;
+      margin: 8px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+      font-size: 13px;
+    }
+    .info-text {
+      font-size: 12px;
+      color: #757575;
+      margin-top: 4px;
+    }
+    .error {
+      color: #d32f2f;
+    }
+    .success {
+      color: #388e3c;
+    }
+    .drive-connection {
+      margin: 15px 0;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+    }
+    .drive-status {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .drive-status-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+    }
+    .drive-actions {
+      display: flex;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Brave Backup Manager</div>
+  
+  <div class="settings-toggle" id="settingsToggle">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="#3f51b5">
+      <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+    </svg>
+    Backup Settings
+  </div>
+  
+  <div class="settings-panel" id="settingsPanel" style="display: none;">
+    <label>
+      Backup Location:
+      <input type="text" id="backupPath" readonly>
+    </label>
+    <button id="changeDirectoryBtn" class="secondary">Select Backup Folder</button>
+    <div class="info-text">
+      Default: "brave-backups" in your Downloads folder<br>
+      <span id="directorySupportText"></span>
+    </div>
+
+    <div class="drive-connection">
+      <div class="drive-status">
+        <svg class="drive-status-icon" viewBox="0 0 24 24" id="driveStatusIcon">
+          <path fill="#757575" d="M7.71,3.5L1.15,15L4.58,21L11.13,9.5M9.73,15L6.3,21H19.42L22.85,15M22.28,14L15.42,2H8.58L8.57,2L15.43,14H22.28Z" />
+        </svg>
+        <span id="driveStatusText">Google Drive: Not connected</span>
+      </div>
+      <div class="drive-actions">
+        <button id="connectDriveBtn" class="secondary">Connect to Google Drive</button>
+        <button id="disconnectDriveBtn" class="secondary" disabled>Disconnect</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="export">Export</div>
+    <div class="tab" data-tab="import">Import</div>
+  </div>
+  
+  <div id="exportTab" class="tab-content active">
+    <div class="options">
+      <label>
+        <input type="checkbox" id="saveBookmarks" checked> 
+        <span>Bookmarks</span>
+      </label>
+      <label>
+        <input type="checkbox" id="saveHistory"> 
+        <span>History</span>
+      </label>
+      <label>
+        <input type="checkbox" id="saveCookies"> 
+        <span>Cookies</span>
+      </label>
+      <label>
+        <input type="checkbox" id="saveExtensions" checked> 
+        <span>Extensions List</span>
+      </label>
+    </div>
+    
+    <button id="exportButton">
+      <span id="exportButtonText">Export Data</span>
+    </button>
+    
+    <div class="progress-container">
+      <div class="progress-label">
+        <span>Progress:</span>
+        <span id="exportProgressText">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="exportProgressBar"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="importTab" class="tab-content">
+    <div class="options">
+      <label>
+        <input type="checkbox" id="importBookmarks" checked> 
+        <span>Import Bookmarks</span>
+      </label>
+      <label>
+        <input type="checkbox" id="importHistory"> 
+        <span>Import History</span>
+      </label>
+      <label>
+        <input type="checkbox" id="importCookies"> 
+        <span>Import Cookies</span>
+      </label>
+      <label>
+        <input type="checkbox" id="importExtensions"> 
+        <span>Install Extensions</span>
+      </label>
+    </div>
+    
+    <div class="file-input-wrapper">
+      <label for="importFile" class="file-input-label">
+        Choose Backup File or Folder
+      </label>
+      <input type="file" id="importFile" webkitdirectory directory multiple>
+    </div>
+    
+    <button id="importButton" class="secondary">
+      <span id="importButtonText">Import Data</span>
+    </button>
+    
+    <div class="progress-container">
+      <div class="progress-label">
+        <span>Progress:</span>
+        <span id="importProgressText">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="importProgressBar"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div id="status">Ready to manage your Brave data</div>
+
+  <!-- Load Google API client -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

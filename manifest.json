@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Brave Backup with Google Drive",
+  "version": "2.0",
+  "description": "Backup and restore Brave browser data with Google Drive integration",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icons/icon48.png",
+      "96": "icons/icon96.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": [
+    "bookmarks",
+    "browsingData",
+    "downloads",
+    "storage",
+    "management",
+    "history",
+    "cookies",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.googleapis.com/*",
+    "https://accounts.google.com/*",
+    "https://*.googleusercontent.com/*"
+  ],
+  "icons": {
+    "48": "icons/icon48.png",
+    "96": "icons/icon96.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.file"
+    ]
+  }
+}
