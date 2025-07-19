@@ -7,13 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     isImporting: false,
     driveConnected: false,
     driveAccessToken: null,
-    driveClientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com', // Replace with your actual client ID
+    driveClientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
     gapiLoaded: false
   };
 
   // Google Drive API configuration
   const driveConfig = {
-    apiKey: 'YOUR_API_KEY', // Replace with your actual API key
+    apiKey: 'YOUR_API_KEY',
     discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
     scopes: "https://www.googleapis.com/auth/drive.file"
   };
@@ -56,13 +56,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Check for File System Access API support
-  function checkDirectoryAccessSupport() {
-    const hasDirectoryAccess = 'showDirectoryPicker' in window;
-    ui.directorySupportText.textContent = hasDirectoryAccess
-      ? "Your browser supports advanced directory selection"
-      : "Your browser uses the Downloads folder for backups";
-    ui.directorySupportText.className = hasDirectoryAccess ? "info-text success" : "info-text";
+  // Get OS timestamp (more accurate than browser time)
+  async function getOSTimestamp() {
+    try {
+      // First try to get timezone-adjusted time
+      const now = new Date();
+      
+      // Get platform info which helps get closer to OS time
+      const platformInfo = await new Promise(resolve => {
+        chrome.runtime.getPlatformInfo(resolve);
+      });
+      
+      // Calculate timezone offset in minutes
+      const timezoneOffset = now.getTimezoneOffset();
+      
+      // Create new date adjusted by timezone offset
+      const osTime = new Date(now.getTime() - (timezoneOffset * 60000));
+      
+      // Format: YYYY-MM-DD_HH-MM-SS
+      return osTime.toISOString()
+        .replace(/T/, '_')         // Replace T with underscore
+        .replace(/\..+/, '')       // Remove milliseconds
+        .replace(/:/g, '-');       // Replace colons with hyphens
+        
+    } catch (error) {
+      console.error("Error getting OS time, falling back to browser time:", error);
+      // Fallback to browser time if OS time fails
+      return new Date().toISOString()
+        .replace(/T/, '_')
+        .replace(/\..+/, '')
+        .replace(/:/g, '-');
+    }
   }
 
   // Initialize Google API client
@@ -73,9 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
       discoveryDocs: driveConfig.discoveryDocs,
       scope: driveConfig.scopes
     }).then(() => {
-      // Listen for sign-in state changes
       gapi.auth2.getAuthInstance().isSignedIn.listen(updateDriveStatus);
-      // Update the UI with current status
       updateDriveStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
     }).catch(err => {
       console.error("Error initializing Google client:", err);
@@ -195,6 +217,15 @@ document.addEventListener('DOMContentLoaded', function() {
     ui.disconnectDriveBtn.addEventListener('click', disconnectFromDrive);
   }
 
+  // Check for File System Access API support
+  function checkDirectoryAccessSupport() {
+    const hasDirectoryAccess = 'showDirectoryPicker' in window;
+    ui.directorySupportText.textContent = hasDirectoryAccess
+      ? "Your browser supports advanced directory selection"
+      : "Your browser uses the Downloads folder for backups";
+    ui.directorySupportText.className = hasDirectoryAccess ? "info-text success" : "info-text";
+  }
+
   // Select backup directory
   async function selectBackupDirectory() {
     try {
@@ -254,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateProgress(type, 0);
   }
 
-  // Execute export
+  // Execute export with OS timestamp
   async function executeExport() {
     state.isExporting = true;
     ui.exportButton.disabled = true;
@@ -263,7 +294,8 @@ document.addEventListener('DOMContentLoaded', function() {
     resetProgress('export');
     
     try {
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      // Get OS-based timestamp
+      const timestamp = await getOSTimestamp();
       const backupFolderName = `brave-backup-${timestamp}`;
       
       const exportData = {
@@ -308,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateProgress('export', progress);
       }
       
-      // Save metadata
+      // Save metadata file
       updateStatus("Finalizing export...");
       await exportMetadata(backupFolderName, timestamp, exportData);
       updateProgress('export', 100);
