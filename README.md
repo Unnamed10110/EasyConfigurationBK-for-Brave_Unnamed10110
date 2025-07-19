@@ -1,10 +1,18 @@
-# Brave Backup Manager - Browser Extension
-
-![Extension Screenshot](https://via.placeholder.com/400x250?text=Brave+Backup+Manager+Screenshot)
+# Brave Backup Manager - Browser Extension By Unnamed10110
 
 ## 📌 Overview
 
 The Brave Backup Manager is a comprehensive browser extension that allows users to easily export and import their Brave browser data, including bookmarks, extensions list, and browser configuration. Now with Google Drive integration for cloud backups!
+
+<img width="446" height="476" alt="image" src="https://github.com/user-attachments/assets/5a4cd7ae-d1d4-42f4-8a2d-8154eef7c834" />
+<br>
+
+<img width="446" height="524" alt="image" src="https://github.com/user-attachments/assets/a73ca6b0-32f2-4c89-9553-02c873764fca" />
+<br>
+
+<img width="461" height="827" alt="image" src="https://github.com/user-attachments/assets/9f309038-5ff9-4a54-8625-2621964fdf73" />
+
+
 
 ## ✨ Features
 
